@@ -14,7 +14,7 @@ fn main() {
 
     match parse_equation(input) {
         Ok((coef, max_degree)) => {
-            println!("{:?}", coef);
+            print_reduced_form(&coef);
         }
 
         Err(err) => {
@@ -32,14 +32,27 @@ fn parse_equation(input: &str) -> Result<(Vec<f64>, usize), String> {
     }
 
     let mut coef = vec![0.0; sides[0].len() + sides[1].len()];
+    let mut check_zero;
 
-    if let Err(e) = parse_side(&sides[0], &mut coef, 1.0) {
+
+    check_zero = sides[0].trim();
+
+    if check_zero == "0" {}
+
+    else if let Err(e) = parse_side(&sides[0], &mut coef, 1.0) {
         return Err(e);
     }
-    if let Err(e) = parse_side(&sides[1], &mut coef, -1.0) {
+
+
+    check_zero = sides[1].trim();
+
+    if check_zero == "0" {}
+
+    else if let Err(e) = parse_side(&sides[1], &mut coef, -1.0) {
         return Err(e);
     }
 
+    
     let mut max_degree = 0;
     for i in (0..coef.len()).rev() {
         if coef[i].abs() > 1e-10 {
@@ -55,11 +68,11 @@ fn parse_equation(input: &str) -> Result<(Vec<f64>, usize), String> {
 }
 
 fn parse_side(side: &str, coef: &mut Vec<f64>, sign: f64) -> Result<(), String> {
+
     let processed_side = side.replace("+", " + ").replace("-", " - ");
-
     let tokens: Vec<&str> = processed_side.split_whitespace().collect();
-
     let mut i = 0;
+
 
     while i < tokens.len() {
         let mut term_sign = sign;
@@ -118,4 +131,31 @@ fn parse_side(side: &str, coef: &mut Vec<f64>, sign: f64) -> Result<(), String> 
     }
 
     Ok(())
+}
+
+fn print_reduced_form(coef: &Vec<f64>) {
+    println!("{:?}", coef);
+
+    print!("Reduced form: ");
+
+    let mut i = 0;
+    while i < coef.len() {
+        if i == 0 {
+            print!("{} * X^{}", coef[i], i);
+        }
+
+        else {
+            if coef[i] < 0.0 {
+                print!(" - {} * X^{}", coef[i].abs(), i);
+            }
+
+            else {
+                print!(" + {} * X^{}", coef[i], i);
+            }
+        }
+
+        i += 1;
+    }
+    println!(" = 0");
+    println!("Polynomial degree: {}", i - 1);
 }
