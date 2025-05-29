@@ -15,6 +15,7 @@ fn main() {
     match parse_equation(input) {
         Ok((coef, max_degree)) => {
             print_reduced_form(&coef);
+            solve_equation(&coef, max_degree);
         }
 
         Err(err) => {
@@ -52,7 +53,7 @@ fn parse_equation(input: &str) -> Result<(Vec<f64>, usize), String> {
         return Err(e);
     }
 
-    
+
     let mut max_degree = 0;
     for i in (0..coef.len()).rev() {
         if coef[i].abs() > 1e-10 {
@@ -134,7 +135,6 @@ fn parse_side(side: &str, coef: &mut Vec<f64>, sign: f64) -> Result<(), String> 
 }
 
 fn print_reduced_form(coef: &Vec<f64>) {
-    println!("{:?}", coef);
 
     print!("Reduced form: ");
 
@@ -158,4 +158,70 @@ fn print_reduced_form(coef: &Vec<f64>) {
     }
     println!(" = 0");
     println!("Polynomial degree: {}", i - 1);
+}
+
+
+fn solve_equation(coef: &[f64], degree: usize) {
+    match degree {
+        0 => solve_degree_zero(&coef),
+        1 => solve_degree_one(&coef),
+        2 => solve_degree_two(&coef),
+        _ => println!("The polynomial degree is strictly greater than 2, I can't solve."),
+    }
+}
+
+fn solve_degree_zero(coef: &[f64]) {
+    let c = coef[0];
+
+    if c.abs() < 1e-10 {
+        println!("Any real number is a solution.");
+    }
+    else {
+        println!("No solution.");
+    }
+}
+
+fn solve_degree_one(coef: &[f64]) {
+    
+    let coef_zero = coef[0];
+    let coef_one = coef[1];
+
+    let result = coef_zero / (-1.0 * coef_one);
+
+    println!("The solution is:\n{}", result);
+}
+
+fn solve_degree_two(coef: &[f64]) {
+    
+    let c = coef[0];
+    let b = coef[1];
+    let a = coef[2];
+
+    let delta = (b * b) - (4.0 * a * c);
+    
+    if delta > 0.0 {
+        println!("Discriminant is strictly positive, the two solutions are:");
+        println!("{}\n{}", (-b - delta.sqrt())/(2.0 * a), (-b + delta.sqrt())/(2.0 * a))
+    }
+
+    else if delta.abs() < 1e-10 {
+        println!("Discriminant is zero, the solution is:");
+        println!("{}", (-b)/(2.0 * a));
+    }
+
+    else {
+        println!("Discriminant is strictly negative, the two complex solutions are:");
+
+        let real_part = -b / (2.0 * a);
+        let imaginary_part = (-delta).sqrt() / (2.0 * a);
+        println!("{} {}", a, b);
+        if real_part.abs() < 1e-10 {
+            println!("{}i", imaginary_part);
+            println!("-{}i", imaginary_part);
+        }
+        else {
+            println!("{} + {}i", real_part, imaginary_part);
+            println!("{} - {}i", real_part, imaginary_part);
+        }
+    }
 }
